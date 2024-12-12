@@ -1,20 +1,19 @@
-package services
+package task
 
 import (
 	"context"
 	"github.com/google/uuid"
 	"task-planer-back/internal/models"
-	"task-planer-back/internal/repository"
 	"time"
 )
 
 type TaskService struct {
-	Repo *repository.TaskRepository
+	Repo *TaskRepository
 }
 
-func (s *TaskService) TaskServices(ctx context.Context, taskDTO *models.TaskDTO) {
+func (s *TaskService) TaskServices(ctx context.Context, taskDTO *DTO) {
 
-	task := &models.Task{
+	task := &Task{
 		Id:          uuid.New(),
 		Name:        taskDTO.Name,
 		CreatedAt:   time.Now(),
