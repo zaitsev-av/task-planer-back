@@ -7,13 +7,13 @@ import (
 	"time"
 )
 
-type TaskService struct {
-	Repo *TaskRepository
+type Service struct {
+	Repo Storage
 }
 
-func (s *TaskService) TaskServices(ctx context.Context, taskDTO *DTO) {
+func (s *Service) TaskServices(ctx context.Context, taskDTO *DTO) {
 
-	task := &Task{
+	t := &Task{
 		Id:          uuid.New(),
 		Name:        taskDTO.Name,
 		CreatedAt:   time.Now(),
@@ -23,7 +23,30 @@ func (s *TaskService) TaskServices(ctx context.Context, taskDTO *DTO) {
 		UserId:      taskDTO.UserId,
 		IsCompleted: taskDTO.IsCompleted,
 	}
-
-	s.Repo.Create(task)
+	s.Repo.CreateTask(ctx, t)
 	return
+}
+
+func (s *Service) CreateTask(ctx context.Context, dto DTO) error {
+	t := &Task{
+		Name:        dto.Name,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Description: dto.Description,
+		Priority:    models.LowPriority,
+		UserId:      dto.UserId,
+		IsCompleted: dto.IsCompleted,
+	}
+	err := s.Repo.CreateTask(ctx, t)
+	if err != nil {
+		return err
+	}
+	//s.Repo.Create(task)
+	return nil
+}
+
+func NewServices(repo Storage) *Service {
+	return &Service{
+		Repo: repo,
+	}
 }

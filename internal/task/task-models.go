@@ -16,10 +16,3 @@ type Task struct {
 	Description string               `json:"description"`
 	UserId      uuid.UUID            `json:"user_id"`
 }
-
-type DTO struct {
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	IsCompleted bool      `json:"is_completed"`
-	UserId      uuid.UUID `json:"user_id"`
-}

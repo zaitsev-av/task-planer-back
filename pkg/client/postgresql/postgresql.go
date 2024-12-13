@@ -7,16 +7,9 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
+	"task-planer-back/config"
 	"time"
 )
-
-type Config struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	Database string
-}
 
 type Client interface {
 	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
@@ -30,15 +23,7 @@ type Client interface {
 	Ping(ctx context.Context) error
 }
 
-const (
-	host     = "localhost"
-	port     = "5432"
-	user     = "your_username"
-	password = "your_password"
-	dbname   = "your_dbname"
-)
-
-func NewClient(ctx context.Context, cf Config) (*pgxpool.Pool, error) {
+func NewClient(ctx context.Context, cf config.StorageConfig) (*pgxpool.Pool, error) {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", cf.Username, cf.Password, cf.Host, cf.Port, cf.Database)
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
