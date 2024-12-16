@@ -58,8 +58,6 @@ func (r *Repository) DeleteTask(ctx context.Context, id string) error {
 	`
 	_, err := r.db.Exec(ctx, q, id)
 
-	fmt.Println(err, "err in repo DeleteTask")
-
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -71,8 +69,28 @@ func (r *Repository) DeleteTask(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *Repository) RenameTask(ctx context.Context, id string, name string) error {
-	panic("")
+func (r *Repository) RenameTask(ctx context.Context, id string, name string) (*task.ChangeNameDTO, error) {
+	var updTask task.ChangeNameDTO
+
+	q := `
+	UPDATE public.tasks 
+	SET name = $2, 
+	    updated_at = NOW()
+	WHERE id = $1
+	RETURNING id, name;
+`
+
+	err := r.db.QueryRow(ctx, q, id, name).Scan(&updTask.Id, &updTask.Name)
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			fmt.Println(pgErr)
+			return nil, pgErr
+		}
+		return nil, err
+	}
+	return &updTask, nil
 }
 
 func (r *Repository) ChangeDescriptionTask(ctx context.Context, id string, description string) error {

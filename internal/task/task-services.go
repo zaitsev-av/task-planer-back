@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"fmt"
 	"github.com/google/uuid"
 	"task-planer-back/internal/models"
 	"time"
@@ -11,7 +12,7 @@ type Service struct {
 	Repo Storage
 }
 
-func (s *Service) TaskServices(ctx context.Context, taskDTO *DTO) {
+func (s *Service) TaskServices(ctx context.Context, taskDTO *CreateTaskDTO) {
 
 	t := &Task{
 		Id:          uuid.New(),
@@ -27,7 +28,7 @@ func (s *Service) TaskServices(ctx context.Context, taskDTO *DTO) {
 	return
 }
 
-func (s *Service) CreateTask(ctx context.Context, dto *DTO) (*Task, error) {
+func (s *Service) CreateTask(ctx context.Context, dto *CreateTaskDTO) (*Task, error) {
 	t := &Task{
 		Name:        dto.Name,
 		CreatedAt:   time.Now(),
@@ -51,6 +52,18 @@ func (s *Service) DeleteTask(ctx context.Context, id string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *Service) ChangeTask(ctx context.Context, id, name string) (*ChangeNameDTO, error) {
+
+	res, err := s.Repo.RenameTask(ctx, id, name)
+	if err != nil {
+		fmt.Println(err, "change task error")
+		return nil, err
+	}
+
+	return res, nil
+
 }
 
 func NewServices(repo Storage) *Service {

@@ -12,12 +12,12 @@ func (s *Service) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusBadRequest)
 	}
 
-	var taskDTO DTO
+	var taskDTO CreateTaskDTO
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&taskDTO)
 	if err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
-		log.Printf("Error decoding task DTO: %s", err)
+		log.Printf("Error decoding task CreateTaskDTO: %s", err)
 		return
 	}
 	var task *Task
@@ -27,12 +27,6 @@ func (s *Service) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error creating task: %s", err)
 		return
 	}
-
-	//responseData, err := json.Marshal(task)
-	//if err != nil {
-	//	http.Error(w, fmt.Sprintf("Failed to encode JSON: %v", err), http.StatusInternalServerError)
-	//	return
-	//}
 
 	w.Header().Set("Content-Type", "application/json")
 	// Отправляем успешный ответ с созданной задачей
@@ -67,4 +61,37 @@ func (s *Service) DeleteTaskById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Service) ChangeTaskById(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method Not Allowed", http.StatusBadRequest)
+	}
+	var payload struct {
+		Id   string `json:"id"`
+		Name string `json:"name"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&payload)
+	if err != nil {
+		http.Error(w, "invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println(payload.Id, "payload.Id", payload.Name, "payload.Name")
+	var changedTask *ChangeNameDTO
+	changedTask, err = s.ChangeTask(r.Context(), payload.Id, payload.Name)
+	fmt.Println(changedTask)
+	if err != nil {
+		http.Error(w, "failed update task name", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(changedTask)
+	if err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
 }
