@@ -34,6 +34,7 @@ func main() {
 	}
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/task", services.CreateTaskHandler)
+	http.HandleFunc("/task/delete", services.DeleteTaskById)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

@@ -27,7 +27,7 @@ func (s *Service) TaskServices(ctx context.Context, taskDTO *DTO) {
 	return
 }
 
-func (s *Service) CreateTask(ctx context.Context, dto DTO) error {
+func (s *Service) CreateTask(ctx context.Context, dto *DTO) (*Task, error) {
 	t := &Task{
 		Name:        dto.Name,
 		CreatedAt:   time.Now(),
@@ -37,11 +37,19 @@ func (s *Service) CreateTask(ctx context.Context, dto DTO) error {
 		UserId:      dto.UserId,
 		IsCompleted: dto.IsCompleted,
 	}
-	err := s.Repo.CreateTask(ctx, t)
+	task, err := s.Repo.CreateTask(ctx, t)
+	if err != nil {
+		return nil, err
+	}
+	//s.Repo.Create(task)
+	return task, nil
+}
+
+func (s *Service) DeleteTask(ctx context.Context, id string) error {
+	err := s.Repo.DeleteTask(ctx, id)
 	if err != nil {
 		return err
 	}
-	//s.Repo.Create(task)
 	return nil
 }
 

@@ -13,12 +13,12 @@ type Repository struct {
 	db postgresql.Client
 }
 
-func (r *Repository) CreateTask(ctx context.Context, task *task.Task) error {
+func (r *Repository) CreateTask(ctx context.Context, task *task.Task) (*task.Task, error) {
 	q := `
 		INSERT INTO tasks 
 		(created_at, updated_at, name, priority, is_completed, description, user_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING created_at, updated_at, name, priority, is_completed, description, user_id
+		RETURNING id, created_at, updated_at, name, priority, is_completed, description, user_id
 		`
 	err := r.db.QueryRow(ctx, q,
 		task.CreatedAt,   // $1
@@ -29,6 +29,7 @@ func (r *Repository) CreateTask(ctx context.Context, task *task.Task) error {
 		task.Description, // $6
 		task.UserId,      // $7
 	).Scan(
+		&task.Id,
 		&task.CreatedAt,
 		&task.UpdatedAt,
 		&task.Name,
@@ -41,18 +42,33 @@ func (r *Repository) CreateTask(ctx context.Context, task *task.Task) error {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			fmt.Println(pgErr)
-			return pgErr
+			return nil, pgErr
 		}
-		return err
+		return nil, err
 	}
-	return nil
+	return task, nil
 }
 func (r *Repository) GetTask(ctx context.Context, id string) (task.Task, error) {
 	panic("")
 }
 
-func (r *Repository) DeleteTask(ctx context.Context, is string) error {
-	panic("")
+func (r *Repository) DeleteTask(ctx context.Context, id string) error {
+	q := `
+	DELETE FROM public.tasks WHERE id=$1;
+	`
+	_, err := r.db.Exec(ctx, q, id)
+
+	fmt.Println(err, "err in repo DeleteTask")
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			fmt.Println(pgErr)
+			return err
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *Repository) RenameTask(ctx context.Context, id string, name string) error {
