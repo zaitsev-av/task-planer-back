@@ -21,13 +21,13 @@ func (r *Repository) CreateTask(ctx context.Context, task *task.Task) (*task.Tas
 		RETURNING id, created_at, updated_at, name, priority, is_completed, description, user_id
 		`
 	err := r.db.QueryRow(ctx, q,
-		task.CreatedAt,   // $1
-		task.UpdatedAt,   // $2
-		task.Name,        // $3
-		task.Priority,    // $4
-		task.IsCompleted, // $5
-		task.Description, // $6
-		task.UserId,      // $7
+		task.CreatedAt,
+		task.UpdatedAt,
+		task.Name,
+		task.Priority,
+		task.IsCompleted,
+		task.Description,
+		task.UserId,
 	).Scan(
 		&task.Id,
 		&task.CreatedAt,

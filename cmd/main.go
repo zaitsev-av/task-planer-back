@@ -4,15 +4,26 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"task-planer-back/config"
 	taskServices "task-planer-back/internal/task"
 	taskRepo "task-planer-back/internal/task/db"
 	"task-planer-back/pkg/client/postgresql"
+	"task-planer-back/pkg/logger"
 )
 
 func main() {
+
+	defaultHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo, AddSource: true})
+	colorHandler := logger.NewColorLogsHandler(defaultHandler)
+
+	customLogger := slog.New(colorHandler)
+	slog.SetDefault(customLogger)
+
+	slog.Info("info level")
+
 	cnf := config.GetConfig()
 
 	client, err := postgresql.NewClient(context.Background(), cnf.Storage)

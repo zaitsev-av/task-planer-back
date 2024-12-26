@@ -42,7 +42,6 @@ func (s *Service) CreateTask(ctx context.Context, dto *CreateTaskDTO) (*Task, er
 	if err != nil {
 		return nil, err
 	}
-	//s.Repo.Create(task)
 	return task, nil
 }
 
