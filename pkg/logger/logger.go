@@ -2,10 +2,25 @@ package logger
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
+	"strconv"
+	"strings"
 )
+
+const (
+	timeFormat   = "[2006-01-02 15:04:05]"
+	reset        = "\033[0m"
+	yellow       = 33
+	lightRed     = 91
+	lightMagenta = 95
+)
+
+func colorizer(colorCode int, v string) string {
+	return fmt.Sprintf("\033[%sm%s%s", strconv.Itoa(colorCode), v, reset)
+}
 
 type ColorLogs struct {
 	w slog.Handler
@@ -46,20 +61,27 @@ func (cl *ColorLogs) Handle(ctx context.Context, record slog.Record) error {
 	//	}
 	//	return a
 	//}
-	var attrs []slog.Attr
+	var attrs = make(map[string]string)
 	record.Attrs(func(attr slog.Attr) bool {
-		fmt.Println(attr)
-		attrs = append(attrs, attr)
+		attrs[attr.Key] = attr.Value.String()
 		return true
 	})
 
-	fmt.Println(attrs)
+	attrsAsBytes, err := json.MarshalIndent(attrs, "", "  ")
+	if err != nil {
+		return fmt.Errorf("error when marshaling attrs: %w", err)
+	}
+	var attributes string
 
-	timeStr := record.Time.Format("[2006-01-02 15:04:05]")
-	keyWord := fmt.Sprintf("%s%s\033[0m", levelColor, record.Level.String()) // Цвет только для уровня
+	outAttrs := strings.Builder{}
+	outAttrs.WriteString(string(attrsAsBytes))
+
+	timeStr := colorizer(yellow, record.Time.Format(timeFormat))
+	keyWord := fmt.Sprintf("%s%s\033[0m", levelColor, record.Level.String())
+	attributes = colorizer(lightMagenta, outAttrs.String())
 
 	msg := record.Message
-	formatted := fmt.Sprintf("%s %s %s\n", timeStr, keyWord, msg)
+	formatted := fmt.Sprintf("%s %s %s\n %s\n", timeStr, keyWord, msg, attributes)
 	fmt.Fprint(os.Stdout, formatted)
 
 	return nil

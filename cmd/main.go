@@ -16,19 +16,20 @@ import (
 
 func main() {
 
-	defaultHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo, AddSource: true})
+	defaultHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo, AddSource: true})
 	colorHandler := logger.NewColorLogsHandler(defaultHandler)
 
 	customLogger := slog.New(colorHandler)
 	slog.SetDefault(customLogger)
 
-	slog.Info("info level")
+	slog.Info("info level", "err", "errrererererere", "err2", "asdasdasd")
 
 	cnf := config.GetConfig()
 
 	client, err := postgresql.NewClient(context.Background(), cnf.Storage)
 	if err != nil {
-		log.Fatal("Fatal err to connect db", err)
+		//log.Fatal("Fatal err to connect db", err)
+		slog.Error("Fatal err to connect db", "error", err)
 		return
 	}
 	repo := taskRepo.NewRepository(client)

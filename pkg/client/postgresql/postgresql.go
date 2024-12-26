@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"log"
+	"log/slog"
 	"task-planer-back/config"
 	"time"
 )
@@ -29,7 +29,8 @@ func NewClient(ctx context.Context, cf config.StorageConfig) (*pgxpool.Pool, err
 	defer cancel()
 	pool, err := pgxpool.Connect(ctx, dsn)
 	if err != nil {
-		log.Fatalf("Database connection failed: %v\n", err)
+		slog.Error("Database connection failed: ", "error", err)
+		//log.Fatalf("Database connection failed: %v\n", err)
 		return nil, err
 	}
 	return pool, nil
