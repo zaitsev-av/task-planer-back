@@ -2,10 +2,10 @@ package logger
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -14,8 +14,11 @@ const (
 	timeFormat   = "[2006-01-02 15:04:05]"
 	reset        = "\033[0m"
 	yellow       = 33
+	lightGray    = 37
 	lightRed     = 91
 	lightMagenta = 95
+	lightBlue    = 94
+	lightCyan    = 96
 )
 
 func colorizer(colorCode int, v string) string {
@@ -23,11 +26,12 @@ func colorizer(colorCode int, v string) string {
 }
 
 type ColorLogs struct {
-	w slog.Handler
+	w         slog.Handler
+	addSource bool
 }
 
-func NewColorLogsHandler(w slog.Handler) *ColorLogs {
-	return &ColorLogs{w: w}
+func NewColorLogsHandler(w slog.Handler, addSource bool) *ColorLogs {
+	return &ColorLogs{w: w, addSource: addSource}
 }
 
 func (cl *ColorLogs) Enabled(ctx context.Context, levels slog.Level) bool {
@@ -49,39 +53,52 @@ func (cl *ColorLogs) Handle(ctx context.Context, record slog.Record) error {
 		levelColor = "\033[0m" // Reset
 	}
 
-	//source := record.
-	//if source.File != "" {
-	//	fmt.Printf("Source: %s:%d\n", source.File, source.Line)
-	//}
-
-	//func(groups []string, a slog.Attr) slog.Attr {
-	//	if a.Key == slog.SourceKey {
-	//		s := a.Value.Any().(*slog.Source)
-	//		s.File = path.Base(s.File)
-	//	}
-	//	return a
-	//}
-	var attrs = make(map[string]string)
+	var attrs []string
 	record.Attrs(func(attr slog.Attr) bool {
-		attrs[attr.Key] = attr.Value.String()
+		attrs = append(attrs, attr.String())
 		return true
 	})
 
-	attrsAsBytes, err := json.MarshalIndent(attrs, "", "  ")
-	if err != nil {
-		return fmt.Errorf("error when marshaling attrs: %w", err)
+	source := &slog.Source{
+		Function: "",
+		File:     "",
+		Line:     0,
 	}
-	var attributes string
 
-	outAttrs := strings.Builder{}
-	outAttrs.WriteString(string(attrsAsBytes))
+	if cl.addSource {
+		frames := runtime.CallersFrames([]uintptr{record.PC})
+		frame, _ := frames.Next()
+		if frame.File != "" {
+			source = &slog.Source{
+				Function: frame.Function,
+				File:     frame.File,
+				Line:     frame.Line,
+			}
+		}
+
+	}
+
+	builder := strings.Builder{}
+	for i, s := range attrs {
+		builder.WriteString(colorizer(lightGray, s))
+		if i != len(attrs)-1 {
+			builder.WriteString("\n")
+		}
+	}
+
+	srcBuilder := strings.Builder{}
+	test := strings.SplitAfter(source.File, "/")
+	if len(test) > 0 {
+		srcBuilder.WriteString(test[len(test)-1])
+	}
 
 	timeStr := colorizer(yellow, record.Time.Format(timeFormat))
 	keyWord := fmt.Sprintf("%s%s\033[0m", levelColor, record.Level.String())
-	attributes = colorizer(lightMagenta, outAttrs.String())
+	src := fmt.Sprintf("%s: %s", colorizer(lightBlue, "SRC"), colorizer(lightMagenta, srcBuilder.String()))
+	line := fmt.Sprintf("%s: %s", colorizer(lightCyan, "|LINE"), colorizer(lightMagenta, strconv.Itoa(source.Line)))
 
 	msg := record.Message
-	formatted := fmt.Sprintf("%s %s %s\n %s\n", timeStr, keyWord, msg, attributes)
+	formatted := fmt.Sprintf("%s %s %s %s%s \n%s\n", timeStr, keyWord, msg, src, line, builder.String())
 	fmt.Fprint(os.Stdout, formatted)
 
 	return nil

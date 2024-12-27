@@ -17,7 +17,7 @@ import (
 func main() {
 
 	defaultHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo, AddSource: true})
-	colorHandler := logger.NewColorLogsHandler(defaultHandler)
+	colorHandler := logger.NewColorLogsHandler(defaultHandler, true)
 
 	customLogger := slog.New(colorHandler)
 	slog.SetDefault(customLogger)
@@ -28,7 +28,6 @@ func main() {
 
 	client, err := postgresql.NewClient(context.Background(), cnf.Storage)
 	if err != nil {
-		//log.Fatal("Fatal err to connect db", err)
 		slog.Error("Fatal err to connect db", "error", err)
 		return
 	}
