@@ -41,7 +41,7 @@ func (cl *Logger) Enabled(ctx context.Context, levels slog.Level) bool {
 	return cl.w.Enabled(ctx, levels)
 }
 
-func (cl *Logger) Handle(ctx context.Context, record slog.Record) error {
+func (cl *Logger) Handle(_ context.Context, record slog.Record) error {
 	var keyWord string
 	switch record.Level {
 	case slog.LevelDebug:

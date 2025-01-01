@@ -3,9 +3,11 @@ package task
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
-	"task-planer-back/internal/models"
 	"time"
+
+	"task-planer-back/internal/models"
+
+	"github.com/google/uuid"
 )
 
 type Service struct {
@@ -15,13 +17,13 @@ type Service struct {
 func (s *Service) TaskServices(ctx context.Context, taskDTO *CreateTaskDTO) {
 
 	t := &Task{
-		Id:          uuid.New(),
+		ID:          uuid.New(),
 		Name:        taskDTO.Name,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 		Description: taskDTO.Description,
 		Priority:    models.LowPriority,
-		UserId:      taskDTO.UserId,
+		UserID:      taskDTO.UserID,
 		IsCompleted: taskDTO.IsCompleted,
 	}
 	s.Repo.CreateTask(ctx, t)
@@ -35,7 +37,7 @@ func (s *Service) CreateTask(ctx context.Context, dto *CreateTaskDTO) (*Task, er
 		UpdatedAt:   time.Now(),
 		Description: dto.Description,
 		Priority:    models.LowPriority,
-		UserId:      dto.UserId,
+		UserID:      dto.UserID,
 		IsCompleted: dto.IsCompleted,
 	}
 	task, err := s.Repo.CreateTask(ctx, t)

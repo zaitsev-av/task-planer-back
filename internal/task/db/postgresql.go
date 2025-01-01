@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/jackc/pgconn"
+
 	"task-planer-back/internal/task"
 	"task-planer-back/pkg/client/postgresql"
+
+	"github.com/jackc/pgconn"
 )
 
 type Repository struct {
@@ -27,16 +29,16 @@ func (r *Repository) CreateTask(ctx context.Context, task *task.Task) (*task.Tas
 		task.Priority,
 		task.IsCompleted,
 		task.Description,
-		task.UserId,
+		task.UserID,
 	).Scan(
-		&task.Id,
+		&task.ID,
 		&task.CreatedAt,
 		&task.UpdatedAt,
 		&task.Name,
 		&task.Priority,
 		&task.IsCompleted,
 		&task.Description,
-		&task.UserId,
+		&task.UserID,
 	)
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -80,7 +82,7 @@ func (r *Repository) RenameTask(ctx context.Context, id string, name string) (*t
 	RETURNING id, name;
 `
 
-	err := r.db.QueryRow(ctx, q, id, name).Scan(&updTask.Id, &updTask.Name)
+	err := r.db.QueryRow(ctx, q, id, name).Scan(&updTask.ID, &updTask.Name)
 
 	if err != nil {
 		var pgErr *pgconn.PgError

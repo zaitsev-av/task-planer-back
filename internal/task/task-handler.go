@@ -38,7 +38,7 @@ func (s *Service) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Service) DeleteTaskById(w http.ResponseWriter, r *http.Request) {
+func (s *Service) DeleteTaskByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Method Not Allowed", http.StatusBadRequest)
 	}
@@ -63,7 +63,7 @@ func (s *Service) DeleteTaskById(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (s *Service) ChangeTaskById(w http.ResponseWriter, r *http.Request) {
+func (s *Service) ChangeTaskByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		http.Error(w, "Method Not Allowed", http.StatusBadRequest)
 	}

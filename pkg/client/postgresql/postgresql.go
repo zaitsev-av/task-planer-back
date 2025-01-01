@@ -3,12 +3,14 @@ package postgresql
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"time"
+
+	"task-planer-back/config"
+
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"log/slog"
-	"task-planer-back/config"
-	"time"
 )
 
 type Client interface {
@@ -30,7 +32,6 @@ func NewClient(ctx context.Context, cf config.StorageConfig) (*pgxpool.Pool, err
 	pool, err := pgxpool.Connect(ctx, dsn)
 	if err != nil {
 		slog.Error("Database connection failed: ", "error", err)
-		//log.Fatalf("Database connection failed: %v\n", err)
 		return nil, err
 	}
 	return pool, nil

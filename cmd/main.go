@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
+
 	"task-planer-back/config"
 	ts "task-planer-back/internal/task"
 	tr "task-planer-back/internal/task/db"
@@ -31,24 +32,28 @@ func main() {
 	}
 	repo := tr.NewRepository(client)
 	services := ts.NewServices(repo)
-	//services.TaskServices(context.Context())
 
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/task", services.CreateTaskHandler)
-	http.HandleFunc("/task/delete", services.DeleteTaskById)
-	http.HandleFunc("/task/change", services.ChangeTaskById)
+	http.HandleFunc("/task/delete", services.DeleteTaskByID)
+	http.HandleFunc("/task/change", services.ChangeTaskByID)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
-		log.Printf("Defaulting to port %s", port)
+		slog.Info("Defaulting to port %s", port)
 	}
 
-	log.Printf("Listening on port %s", port)
-	log.Printf("Open http://localhost:%s in the browser", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
-
-	//repo := db.NewRepository()
+	slog.Info("Listening on port %s", port)
+	slog.Info("Open http://localhost:%s in the browser", port)
+	server := &http.Server{
+		Addr:              port,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+	err = server.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
