@@ -15,9 +15,9 @@ import (
 )
 
 func main() {
-
-	defaultHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo, AddSource: true})
-	colorHandler := logger.NewColorLogsHandler(defaultHandler, true)
+	options := &slog.HandlerOptions{Level: slog.LevelInfo, AddSource: true}
+	defaultHandler := slog.NewTextHandler(os.Stderr, options)
+	colorHandler := logger.NewLoggerHandler(defaultHandler, options)
 
 	customLogger := slog.New(colorHandler)
 	slog.SetDefault(customLogger)
