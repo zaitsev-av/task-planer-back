@@ -29,7 +29,7 @@ func (s *Service) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	// Отправляем успешный ответ с созданной задачей
+
 	w.WriteHeader(http.StatusCreated)
 	err = json.NewEncoder(w).Encode(task)
 	if err != nil {
