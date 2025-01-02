@@ -14,6 +14,12 @@ type Service struct {
 	Repo Storage
 }
 
+func NewServices(repo Storage) *Service {
+	return &Service{
+		Repo: repo,
+	}
+}
+
 func (s *Service) TaskServices(ctx context.Context, taskDTO *CreateTaskDTO) {
 
 	t := &Task{
@@ -65,10 +71,4 @@ func (s *Service) ChangeTask(ctx context.Context, id, name string) (*ChangeNameD
 
 	return res, nil
 
-}
-
-func NewServices(repo Storage) *Service {
-	return &Service{
-		Repo: repo,
-	}
 }

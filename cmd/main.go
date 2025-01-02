@@ -41,11 +41,11 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
-		slog.Info("Defaulting to port %s", port)
+		slog.Info("Defaulting to port", port)
 	}
 
-	slog.Info("Listening on port %s", port)
-	slog.Info("Open http://localhost:%s in the browser", port)
+	slog.Info("Listening on port", port)
+	slog.Info("Open in the browser", "http://localhost:", port)
 	server := &http.Server{
 		Addr:              port,
 		ReadHeaderTimeout: 5 * time.Second,
