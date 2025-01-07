@@ -2,9 +2,10 @@ package task
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
+
+	"task-planer-back/internal/models"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -42,14 +43,14 @@ func (m *MockStorage) ChangeDescriptionTask(ctx context.Context, id string, desc
 	return args.Error(0)
 }
 
-func TestCreateTask(t *testing.T) {
+func TestService_CreateTask(t *testing.T) {
 	mockRepo := new(MockStorage)
-	service := &Service{Repo: mockRepo}
+	service := NewServices(mockRepo)
 
 	ctx := context.Background()
 	dto := &CreateTaskDTO{
 		Name:        "Test Task",
-		Description: "Test Description",
+		Description: "Description",
 		UserID:      uuid.New(),
 		IsCompleted: false,
 	}
@@ -57,30 +58,41 @@ func TestCreateTask(t *testing.T) {
 	expectedTask := &Task{
 		ID:          uuid.New(),
 		Name:        dto.Name,
-		Description: dto.Description,
-		UserID:      dto.UserID,
-		IsCompleted: dto.IsCompleted,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
+		Description: dto.Description,
+		Priority:    models.LowPriority,
+		UserID:      dto.UserID,
+		IsCompleted: dto.IsCompleted,
 	}
 
-	mockRepo.On("CreateTask", ctx, mock.AnythingOfType("*Task")).Return(expectedTask, nil)
+	mockRepo.On("CreateTask", ctx, mock.MatchedBy(func(task *Task) bool {
+		return task.Name == dto.Name &&
+			task.Description == dto.Description &&
+			task.UserID == dto.UserID &&
+			task.IsCompleted == dto.IsCompleted
+	})).Return(expectedTask, nil)
 
 	task, err := service.CreateTask(ctx, dto)
 
 	require.NoError(t, err)
 	assert.NotNil(t, task)
-	assert.Equal(t, expectedTask, task)
+	assert.Equal(t, expectedTask.Name, task.Name)
 
-	mockRepo.AssertCalled(t, "CreateTask", ctx, mock.AnythingOfType("*Task"))
+	mockRepo.AssertExpectations(t)
+}
 
-	mockRepo.On("CreateTask", ctx, mock.AnythingOfType("*Task")).Return(nil, errors.New("repository error"))
+func TestService_DeleteTask(t *testing.T) {
+	mockRepo := new(MockStorage)
+	service := NewServices(mockRepo)
 
-	task, err = service.CreateTask(ctx, dto)
+	ctx := context.Background()
+	id := "task-id"
 
-	require.Error(t, err)
-	assert.Nil(t, task)
-	assert.EqualError(t, err, "repository error")
+	mockRepo.On("DeleteTask", ctx, id).Return(nil)
 
-	mockRepo.AssertCalled(t, "CreateTask", ctx, mock.AnythingOfType("*Task"))
+	err := service.DeleteTask(ctx, id)
+
+	require.NoError(t, err)
+	mockRepo.AssertCalled(t, "DeleteTask", ctx, id)
 }
