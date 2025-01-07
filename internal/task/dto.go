@@ -13,6 +13,14 @@ type CreateTaskDTO struct {
 	UserID      uuid.UUID `json:"user_id"`
 }
 
+type ChangeTaskDTO struct {
+	ID          string                `json:"id"`
+	Name        *string               `json:"name"`
+	Description *string               `json:"description"`
+	IsCompleted *string               `json:"is_completed"`
+	Priority    *models.PriorityModel `json:"priority"`
+}
+
 type ChangeNameDTO struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`

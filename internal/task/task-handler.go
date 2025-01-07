@@ -68,7 +68,7 @@ func (s *Service) ChangeTaskByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusBadRequest)
 	}
 	var payload struct {
-		Id   string `json:"id"`
+		ID   string `json:"id"`
 		Name string `json:"name"`
 	}
 
@@ -79,9 +79,9 @@ func (s *Service) ChangeTaskByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(payload.Id, "payload.Id", payload.Name, "payload.Name")
+	fmt.Println(payload.ID, "payload.Id", payload.Name, "payload.Name")
 	var changedTask *ChangeNameDTO
-	changedTask, err = s.ChangeTask(r.Context(), payload.Id, payload.Name)
+	changedTask, err = s.ChangeTask(r.Context(), payload.ID, payload.Name)
 	fmt.Println(changedTask)
 	if err != nil {
 		http.Error(w, "failed update task name", http.StatusInternalServerError)

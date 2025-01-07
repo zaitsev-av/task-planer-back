@@ -2,7 +2,7 @@ package task
 
 import (
 	"context"
-	"fmt"
+	"reflect"
 	"time"
 
 	"task-planer-back/internal/models"
@@ -61,14 +61,31 @@ func (s *Service) DeleteTask(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *Service) ChangeTask(ctx context.Context, id, name string) (*ChangeNameDTO, error) {
+func (s *Service) ChangeTask(ctx context.Context, dto *ChangeTaskDTO) (any, error) {
 
-	res, err := s.Repo.RenameTask(ctx, id, name)
-	if err != nil {
-		fmt.Println(err, "change task error")
-		return nil, err
+	var result any
+	values := reflect.ValueOf(dto)
+
+	for i := 0; i < values.NumField(); i++ {
+		switch values.Field(i) {
+		case values.FieldByName("name"):
+
+			//case dto.Name != nil:
+			//	res, err := s.Repo.RenameTask(ctx, dto.ID, *dto.Name)
+			//	if err != nil {
+			//		fmt.Println(err, "change task error")
+			//		return nil, err
+			//	}
+			//	result = res
+			//case dto.Description != nil:
+			//	err := s.Repo.ChangeDescriptionTask(ctx, dto.ID, *dto.Description)
+			//	if err != nil {
+			//		fmt.Println(err, "change task error")
+			//		return nil, err
+			//	}
+		}
 	}
 
-	return res, nil
+	return result, nil
 
 }
