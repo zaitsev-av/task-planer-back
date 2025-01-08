@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
-	"time"
 
 	"task-planer-back/config"
 	ts "task-planer-back/internal/task"
@@ -41,19 +41,20 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
-		slog.Info("Defaulting to port", port)
+		slog.Info("Defaulting to port", "port", port)
 	}
 
-	slog.Info("Listening on port", port)
-	slog.Info("Open in the browser", "http://localhost:", port)
-	server := &http.Server{
-		Addr:              port,
-		ReadHeaderTimeout: 5 * time.Second,
-	}
-	err = server.ListenAndServe()
-	if err != nil {
-		panic(err)
-	}
+	slog.Info("Listening on port", "port", port)
+	slog.Info("Open in the browser", "address", fmt.Sprintf("http://localhost:%s", port))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	//server := &http.Server{
+	//	Addr:              port,
+	//	ReadHeaderTimeout: 5 * time.Second,
+	//}
+	//err = server.ListenAndServe()
+	//if err != nil {
+	//	//panic(err)
+	//}
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {

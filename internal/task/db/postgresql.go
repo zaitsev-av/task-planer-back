@@ -71,18 +71,44 @@ func (r *Repository) DeleteTask(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *Repository) RenameTask(ctx context.Context, id string, name string) (*task.ChangeNameDTO, error) {
-	var updTask task.ChangeNameDTO
+func (r *Repository) UpdateTask(ctx context.Context, updatedTask task.Task) (*task.Task, error) {
+	var updTask task.Task
+
+	//	q := `
+	//	UPDATE public.tasks
+	//	SET name = $2,
+	//	    updated_at = NOW()
+	//	WHERE id = $1
+	//	RETURNING id, name;
+	//`
 
 	q := `
-	UPDATE public.tasks 
-	SET name = $2, 
-	    updated_at = NOW()
-	WHERE id = $1
-	RETURNING id, name;
-`
+		UPDATE  public.tasks 
+		SET 
+		    updated_at = NOW()
+		    name = $1
+		    priority = $2
+		    is_completed = $3
+		    description = $4
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, created_at, updated_at, name, priority, is_completed, description, user_id;
+		`
 
-	err := r.db.QueryRow(ctx, q, id, name).Scan(&updTask.ID, &updTask.Name)
+	err := r.db.QueryRow(ctx, q,
+		updatedTask.Name,
+		updatedTask.Priority,
+		updatedTask.IsCompleted,
+		updatedTask.Description,
+	).Scan(
+		&updTask.ID,
+		&updTask.CreatedAt,
+		&updTask.UpdatedAt,
+		&updTask.Name,
+		&updTask.Priority,
+		&updTask.IsCompleted,
+		&updTask.Description,
+		&updTask.UserID,
+	)
 
 	if err != nil {
 		var pgErr *pgconn.PgError

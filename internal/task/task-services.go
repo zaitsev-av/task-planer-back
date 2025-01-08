@@ -2,7 +2,7 @@ package task
 
 import (
 	"context"
-	"reflect"
+	"log/slog"
 	"time"
 
 	"task-planer-back/internal/models"
@@ -61,31 +61,35 @@ func (s *Service) DeleteTask(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *Service) ChangeTask(ctx context.Context, dto *ChangeTaskDTO) (any, error) {
-
-	var result any
-	values := reflect.ValueOf(dto)
-
-	for i := 0; i < values.NumField(); i++ {
-		switch values.Field(i) {
-		case values.FieldByName("name"):
-
-			//case dto.Name != nil:
-			//	res, err := s.Repo.RenameTask(ctx, dto.ID, *dto.Name)
-			//	if err != nil {
-			//		fmt.Println(err, "change task error")
-			//		return nil, err
-			//	}
-			//	result = res
-			//case dto.Description != nil:
-			//	err := s.Repo.ChangeDescriptionTask(ctx, dto.ID, *dto.Description)
-			//	if err != nil {
-			//		fmt.Println(err, "change task error")
-			//		return nil, err
-			//	}
-		}
+func (s *Service) ChangeTask(ctx context.Context, dto ChangeTaskDTO) (*Task, error) {
+	slog.Info("task ID", "ID", dto.ID)
+	task, err := s.Repo.GetTask(ctx, dto.ID)
+	if err != nil {
+		slog.Error("get task error", "err", err)
+		return nil, err
 	}
 
-	return result, nil
+	if dto.Name != nil {
+		task.Name = *dto.Name
+	}
+
+	if dto.Description != nil {
+		task.Description = *dto.Description
+	}
+
+	if dto.IsCompleted != nil {
+		task.IsCompleted = *dto.IsCompleted
+	}
+
+	if dto.Priority != nil {
+		task.Priority = *dto.Priority
+	}
+
+	updateTask, err := s.Repo.UpdateTask(ctx, task)
+	if err != nil {
+		return nil, err
+	}
+
+	return updateTask, nil
 
 }
