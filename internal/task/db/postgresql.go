@@ -50,8 +50,33 @@ func (r *Repository) CreateTask(ctx context.Context, task *task.Task) (*task.Tas
 	}
 	return task, nil
 }
-func (r *Repository) GetTask(ctx context.Context, id string) (task.Task, error) {
-	panic("")
+func (r *Repository) GetTask(ctx context.Context, id string) (*task.Task, error) {
+	q := `
+		SELECT id, created_at, updated_at, name, priority, is_completed, description, user_id
+		FROM public.tasks
+		WHERE id = $1
+`
+	var t task.Task
+	err := r.db.QueryRow(ctx, q, id).Scan(
+		&t.ID,
+		&t.Name,
+		&t.Description,
+		&t.Priority,
+		&t.UpdatedAt,
+		&t.CreatedAt,
+		&t.IsCompleted,
+		&t.UserID,
+	)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			fmt.Println(pgErr)
+			return nil, err
+		}
+		return nil, err
+	}
+	return &t, nil
+
 }
 
 func (r *Repository) DeleteTask(ctx context.Context, id string) error {
@@ -90,7 +115,8 @@ func (r *Repository) UpdateTask(ctx context.Context, updatedTask task.Task) (*ta
 		    priority = $2
 		    is_completed = $3
 		    description = $4
-		VALUES ($1, $2, $3, $4)
+		WHERE id = $5
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, created_at, updated_at, name, priority, is_completed, description, user_id;
 		`
 
@@ -99,6 +125,7 @@ func (r *Repository) UpdateTask(ctx context.Context, updatedTask task.Task) (*ta
 		updatedTask.Priority,
 		updatedTask.IsCompleted,
 		updatedTask.Description,
+		updatedTask.ID,
 	).Scan(
 		&updTask.ID,
 		&updTask.CreatedAt,
