@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -87,6 +88,26 @@ func (s *Service) ChangeTaskByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(changedTask)
+	if err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *Service) GetTaskByID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusBadRequest)
+	}
+	id := r.URL.Query().Get("id")
+
+	task, err := s.GetTask(r.Context(), id)
+	slog.Info("get task by ID", "id", id, "task", task)
+	if err != nil {
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(task)
 	if err != nil {
 		http.Error(w, "Failed to write response", http.StatusInternalServerError)
 		return

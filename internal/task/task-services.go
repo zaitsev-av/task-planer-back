@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -85,11 +86,18 @@ func (s *Service) ChangeTask(ctx context.Context, dto ChangeTaskDTO) (*Task, err
 		task.Priority = *dto.Priority
 	}
 
-	updateTask, err := s.Repo.UpdateTask(ctx, task)
+	updateTask, err := s.Repo.UpdateTask(ctx, *task)
 	if err != nil {
 		return nil, err
 	}
 
 	return updateTask, nil
+}
 
+func (s *Service) GetTask(ctx context.Context, id string) (*Task, error) {
+	task, err := s.Repo.GetTask(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("error get task %s", err)
+	}
+	return task, nil
 }

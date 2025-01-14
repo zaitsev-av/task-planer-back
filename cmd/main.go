@@ -34,9 +34,10 @@ func main() {
 	services := ts.NewServices(repo)
 
 	http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/task", services.CreateTaskHandler)
+	http.HandleFunc("/task/create", services.CreateTaskHandler)
 	http.HandleFunc("/task/delete", services.DeleteTaskByID)
 	http.HandleFunc("/task/change", services.ChangeTaskByID)
+	http.HandleFunc("/task", services.GetTaskByID)
 
 	port := os.Getenv("PORT")
 	if port == "" {

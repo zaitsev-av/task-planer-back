@@ -148,10 +148,6 @@ func (r *Repository) UpdateTask(ctx context.Context, updatedTask task.Task) (*ta
 	return &updTask, nil
 }
 
-func (r *Repository) ChangeDescriptionTask(ctx context.Context, id string, description string) error {
-	panic("")
-}
-
 func NewRepository(client postgresql.Client) task.Storage {
 	return &Repository{
 		db: client,
