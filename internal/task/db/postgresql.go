@@ -99,24 +99,15 @@ func (r *Repository) DeleteTask(ctx context.Context, id string) error {
 func (r *Repository) UpdateTask(ctx context.Context, updatedTask task.Task) (*task.Task, error) {
 	var updTask task.Task
 
-	//	q := `
-	//	UPDATE public.tasks
-	//	SET name = $2,
-	//	    updated_at = NOW()
-	//	WHERE id = $1
-	//	RETURNING id, name;
-	//`
-
 	q := `
 		UPDATE  public.tasks 
 		SET 
-		    updated_at = NOW()
-		    name = $1
-		    priority = $2
-		    is_completed = $3
+		    updated_at = NOW(),
+		    name = $1,
+		    priority = $2,
+		    is_completed = $3,
 		    description = $4
 		WHERE id = $5
-		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, created_at, updated_at, name, priority, is_completed, description, user_id;
 		`
 
