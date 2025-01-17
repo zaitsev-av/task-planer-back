@@ -59,12 +59,12 @@ func (r *Repository) GetTask(ctx context.Context, id string) (*task.Task, error)
 	var t task.Task
 	err := r.db.QueryRow(ctx, q, id).Scan(
 		&t.ID,
-		&t.Name,
-		&t.Description,
-		&t.Priority,
-		&t.UpdatedAt,
 		&t.CreatedAt,
+		&t.UpdatedAt,
+		&t.Name,
+		&t.Priority,
 		&t.IsCompleted,
+		&t.Description,
 		&t.UserID,
 	)
 	if err != nil {
